@@ -43,6 +43,10 @@ public slots:
 	//qDebug() << "Got datapoint:" << d.frequency;
     }
 
+    void deviceLogReceived(QString line) {
+	//qDebug() << line;
+    }
+
     void deviceInfoUpdated() {
        lastInfo = Device::Info();
     }
@@ -129,14 +133,14 @@ int main( int argc, char **argv ) {
 
     Protocol::SweepSettings sweepSettings;
 
-    sweepSettings.f_start = 10000000;
-    sweepSettings.f_stop = 3000000000;
-    sweepSettings.points = 303;
-    sweepSettings.if_bandwidth = 10000;
+    sweepSettings.f_start = 100000000;
+    sweepSettings.f_stop = 2000000000;
+    sweepSettings.points = 100;
+    sweepSettings.if_bandwidth = 100000;
     sweepSettings.cdbm_excitation_start = freqExcitationLevel * 100;
     sweepSettings.excitePort1 = 1;
     sweepSettings.excitePort2 = 0;
-    sweepSettings.suppressPeaks = 1;
+    sweepSettings.suppressPeaks = 0;
     sweepSettings.fixedPowerSetting = 1;
     sweepSettings.cdbm_excitation_stop = freqExcitationLevel * 100;
 
@@ -159,9 +163,10 @@ int main( int argc, char **argv ) {
             });
 
     qRegisterMetaType<Protocol::Datapoint>("Datapoint");
-    
-    QObject::connect(device, &Device::DatapointReceived, dataReceiver, &TraceDataReceiver::newDataPoint);
+   
+    QObject::connect(device, &Device::DatapointReceived, dataReceiver, &TraceDataReceiver::newDataPoint, Qt::DirectConnection);
     QObject::connect(device, &Device::DeviceInfoUpdated, dataReceiver, &TraceDataReceiver::deviceInfoUpdated);
+    QObject::connect(device, &Device::LogLineReceived, dataReceiver, &TraceDataReceiver::deviceLogReceived);
 
     return app.exec();
 }
