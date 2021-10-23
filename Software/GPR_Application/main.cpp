@@ -116,6 +116,17 @@ int main( int argc, char **argv ) {
     device = new Device(serial);
 
     setLevel(-10.00);
+
+    Protocol::ReferenceSettings referenceSettings;
+    referenceSettings.ExtRefOuputFreq = 0;
+    referenceSettings.AutomaticSwitch = 0;
+    referenceSettings.UseExternalRef = 0;
+
+    Protocol::PacketInfo pReferenceSettings;
+    pReferenceSettings.type = Protocol::PacketType::Reference;
+
+    device->SendPacket(pReferenceSettings);
+
     Protocol::SweepSettings sweepSettings;
 
     sweepSettings.f_start = 10000000;
