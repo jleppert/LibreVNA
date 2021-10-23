@@ -1,3 +1,6 @@
 /.metadata/
 RemoteSystemsTempFiles
 build-*
+*.o
+moc_*
+Makefile
