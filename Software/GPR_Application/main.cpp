@@ -111,6 +111,11 @@ int main( int argc, char **argv ) {
 
     QString serial = QString();
   
+    //Protocol::Datapoint sweepPoints[sweepSettings.f_stop - sweepSettings.f_start];
+
+    device = new Device(serial);
+
+    setLevel(-10.00);
     Protocol::SweepSettings sweepSettings;
 
     sweepSettings.f_start = 10000000;
@@ -119,19 +124,15 @@ int main( int argc, char **argv ) {
     sweepSettings.if_bandwidth = 10000;
     sweepSettings.cdbm_excitation_start = freqExcitationLevel * 100;
     sweepSettings.excitePort1 = 1;
-    sweepSettings.excitePort2 = 1;
+    sweepSettings.excitePort2 = 0;
     sweepSettings.suppressPeaks = 1;
-    sweepSettings.fixedPowerSetting = 1;
+    sweepSettings.fixedPowerSetting = 0;
     sweepSettings.cdbm_excitation_stop = freqExcitationLevel * 100;
 
-    //Protocol::Datapoint sweepPoints[sweepSettings.f_stop - sweepSettings.f_start];
-
-    device = new Device(serial);
-
     Protocol::PacketInfo pSweepSettings;
-    pSweepSettings.type = Protocol::PacketType::Reference;
-    pSweepSettings.reference = s;
-    device->SendPacket(p);
+    pSweepSettings.type = Protocol::PacketType::SweepSettings;
+    pSweepSettings.settings = sweepSettings;
+    device->SendPacket(pSweepSettings);
 
     qRegisterMetaType<Protocol::Datapoint>("Datapoint");
     
