@@ -193,8 +193,8 @@ Device::Device(QString serial)
     qInfo() << "USB connection established" << flush;
     m_connected = true;
     m_receiveThread = new std::thread(&Device::USBHandleThread, this);
-    dataBuffer = new USBInBuffer(m_handle, EP_Data_In_Addr, 65536);
-    logBuffer = new USBInBuffer(m_handle, EP_Log_In_Addr, 65536);
+    dataBuffer = new USBInBuffer(m_handle, EP_Data_In_Addr, 65536 * 10);
+    logBuffer = new USBInBuffer(m_handle, EP_Log_In_Addr, 65536 * 10);
     connect(dataBuffer, &USBInBuffer::DataReceived, this, &Device::ReceivedData, Qt::DirectConnection);
     connect(dataBuffer, &USBInBuffer::TransferError, this, &Device::ConnectionLost);
     connect(logBuffer, &USBInBuffer::DataReceived, this, &Device::ReceivedLog, Qt::DirectConnection);
