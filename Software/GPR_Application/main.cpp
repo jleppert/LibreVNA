@@ -3,6 +3,7 @@
 #include <iostream>
 #include <QtDebug>
 
+#include <chrono>
 #include "tcpserver.h"
 
 #include "../PC_Application/Device/device.h"
@@ -18,6 +19,8 @@ TCPServer *server;
 
 Protocol::Datapoint lastPoint;
 
+auto beginTime = std::chrono::high_resolution_clock::now();
+
 class TraceDataReceiver : public QObject {
     Q_OBJECT
 public:
@@ -26,13 +29,18 @@ public:
 public slots:
     void newDataPoint(Protocol::Datapoint d) {
 	if(lastPoint.frequency > 0 && (d.frequency < lastPoint.frequency)) {
-	   server->send(QString("\n"));
+	   //server->send(QString("\n"));
+	   auto endTime = std::chrono::high_resolution_clock::now();
+	   auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - beginTime);
+	   printf("Time measured: %.3f seconds.\n", elapsed.count() * 1e-9);
+
+	   beginTime = std::chrono::high_resolution_clock::now();
 	} else {
-	   server->send(QString::fromStdString(std::to_string(d.frequency) + "," + std::to_string(d.real_S21) + "," + std::to_string(d.imag_S21) + ";")); 
+	   //server->send(QString::fromStdString(std::to_string(d.frequency) + "," + std::to_string(d.real_S21) + "," + std::to_string(d.imag_S21) + ";")); 
 	}
 
 	lastPoint = d;
-	qDebug() << "Got datapoint:" << d.frequency;
+	//qDebug() << "Got datapoint:" << d.frequency;
     }
 
     void deviceInfoUpdated() {
@@ -97,7 +105,7 @@ int main( int argc, char **argv ) {
 
     qDebug() << "Starting TCP server on port 6969...";
 
-    server = new TCPServer(6969);
+    //server = new TCPServer(6969);
 
     qDebug() << "Attempting to connect to device...";
 
@@ -116,14 +124,19 @@ int main( int argc, char **argv ) {
     sweepSettings.fixedPowerSetting = 1;
     sweepSettings.cdbm_excitation_stop = freqExcitationLevel * 100;
 
-    Protocol::Datapoint sweepPoints[sweepSettings.f_stop - sweepSettings.f_start];
+    //Protocol::Datapoint sweepPoints[sweepSettings.f_stop - sweepSettings.f_start];
 
     device = new Device(serial);
 
+    Protocol::PacketInfo pSweepSettings;
+    pSweepSettings.type = Protocol::PacketType::Reference;
+    pSweepSettings.reference = s;
+    device->SendPacket(p);
+
     qRegisterMetaType<Protocol::Datapoint>("Datapoint");
     
-    QObject::connect(device, &Device::DatapointReceived, dataReceiver, &TraceDataReceiver::newDataPoint, Qt::UniqueConnection);
-    QObject::connect(device, &Device::DeviceInfoUpdated, dataReceiver, &TraceDataReceiver::deviceInfoUpdated, Qt::UniqueConnection);
+    QObject::connect(device, &Device::DatapointReceived, dataReceiver, &TraceDataReceiver::newDataPoint);
+    QObject::connect(device, &Device::DeviceInfoUpdated, dataReceiver, &TraceDataReceiver::deviceInfoUpdated);
 
     return app.exec();
 }
