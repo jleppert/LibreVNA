@@ -126,13 +126,26 @@ int main( int argc, char **argv ) {
     sweepSettings.excitePort1 = 1;
     sweepSettings.excitePort2 = 0;
     sweepSettings.suppressPeaks = 1;
-    sweepSettings.fixedPowerSetting = 0;
+    sweepSettings.fixedPowerSetting = 1;
     sweepSettings.cdbm_excitation_stop = freqExcitationLevel * 100;
 
     Protocol::PacketInfo pSweepSettings;
     pSweepSettings.type = Protocol::PacketType::SweepSettings;
     pSweepSettings.settings = sweepSettings;
-    device->SendPacket(pSweepSettings);
+    device->SendPacket(pSweepSettings, [=](Device::TransmissionResult res){
+            if(res == Device::TransmissionResult::Ack) {
+		qDebug() << "Device responded ACK";
+
+	    } else if(res == Device::TransmissionResult::Nack) {
+		qDebug() << "Device responded NACK";
+
+	    } else if(res == Device::TransmissionResult::Timeout) {
+	    	qDebug() << "Device timeout";
+            } else if(res == Device::TransmissionResult::InternalError) {
+		qDebug() << "Device Internal Error!";
+	    }
+		    // device received command, reset traces now
+            });
 
     qRegisterMetaType<Protocol::Datapoint>("Datapoint");
     
