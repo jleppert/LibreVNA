@@ -19,13 +19,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++17 console
 
-QT += core widgets
+QT += core widgets network
 
 HEADERS += \
     ../VNA_embedded/Application/Communication/Protocol.hpp \
     ../PC_Application/CustomWidgets/informationbox.h \
     ../PC_Application/Device/device.h \
-    ../PC_Application/mode.h
+    ../PC_Application/mode.h \
+    ../PC_Application/tcpserver.h
 
 INCLUDEPATH += \
   ../PC_Application/
